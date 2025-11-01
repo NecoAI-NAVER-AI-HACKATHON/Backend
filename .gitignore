@@ -1,0 +1,6 @@
+.env
+
+neco-ai/
+
+__pycache__/
+*.pyc
