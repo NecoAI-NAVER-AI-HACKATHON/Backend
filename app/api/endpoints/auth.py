@@ -1,7 +1,12 @@
-from fastapi import APIRouter, HTTPException, status
-from supabase import create_client, Client
-from app.core.config import configs
+from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordBearer
+
+from dependency_injector.wiring import Provide, inject
+
+from app.core.containers.application_container import ApplicationContainer
+from app.db.database import Database
 from app.schemas.auth_schema import (
+    LogoutResponse,
     SignupRequest,
     SignupResponse,
     LoginRequest,
@@ -12,18 +17,19 @@ from app.schemas.auth_schema import (
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
-
-def supabase_client_user() -> Client:
-    # Use ANON KEY for user actions: signup/login/refresh
-    return create_client(configs.SUPABASE_URL, configs.SUPABASE_ANON_KEY)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 @router.post(
     '/signup', response_model=SignupResponse, status_code=status.HTTP_201_CREATED
 )
-def signup(payload: SignupRequest):
-    sb = supabase_client_user()
+@inject
+def signup(
+    payload: SignupRequest,
+    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+):
     try:
+        sb = db.get_client()
         res = sb.auth.sign_up(
             {
                 'email': payload.email,
@@ -42,9 +48,13 @@ def signup(payload: SignupRequest):
 
 
 @router.post('/login', response_model=LoginResponse)
-def login(payload: LoginRequest):
-    sb = supabase_client_user()
+@inject
+def login(
+    payload: LoginRequest,
+    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+):
     try:
+        sb = db.get_client()
         res = sb.auth.sign_in_with_password(
             {
                 'email': payload.email,
@@ -65,9 +75,13 @@ def login(payload: LoginRequest):
 
 
 @router.post('/refresh', response_model=RefreshResponse)
-def refresh(payload: RefreshRequest):
-    sb = supabase_client_user()
+@inject
+def refresh(
+    payload: RefreshRequest,
+    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+):
     try:
+        sb = db.get_client()
         res = sb.auth.refresh_session(payload.refresh_token)
         if not res.session or not res.session.access_token:
             raise HTTPException(status_code=401, detail='Invalid refresh token.')
@@ -79,3 +93,22 @@ def refresh(payload: RefreshRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.post('/logout', response_model=LogoutResponse)
+@inject
+def logout(
+    token: str = Depends(oauth2_scheme),
+    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+):
+    try:
+        # Sign out the user using the provided JWT
+        # This will revoke the refresh token and clear the session.
+        sb = db.get_client()
+        sb.auth.admin.sign_out(token)
+
+        return {
+            'message': 'Logout successfully.',
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

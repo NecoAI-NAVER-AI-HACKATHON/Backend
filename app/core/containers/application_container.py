@@ -8,6 +8,13 @@ from app.core.containers.service_container import ServiceContainer
 class ApplicationContainer(containers.DeclarativeContainer):
     logger = logging.getLogger(__name__)
 
+    wiring_config = containers.WiringConfiguration(
+        modules=[
+            'app.api.endpoints.auth',
+            'app.api.endpoints.user',
+        ]
+    )
+
     config = providers.Configuration()
     config.override(configs.model_dump())
 
