@@ -9,9 +9,9 @@ some common operations.
 
 import os
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from supabase import create_client
+from supabase import create_client, Client
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,10 @@ class Database:
             )
 
         self.client = create_client(self.url, self.key)
+
+    def get_client(self) -> Client:
+        '''Return the underlying Supabase client instance.'''
+        return self.client
 
     def table(self, table_name: str):
         '''Return the low-level table proxy from the supabase client.

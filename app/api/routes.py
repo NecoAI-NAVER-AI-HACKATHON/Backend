@@ -2,9 +2,10 @@ from fastapi import APIRouter
 
 from app.api.endpoints.health import router as health_router
 from app.api.endpoints.auth import router as auth_router
+from app.api.endpoints.user import router as user_router
 
 routers = APIRouter()
-router_list = [health_router, auth_router]
+router_list = [health_router, auth_router, user_router]
 
 for router in router_list:
     router.tags = routers

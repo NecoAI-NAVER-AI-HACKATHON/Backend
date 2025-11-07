@@ -33,3 +33,7 @@ class RefreshResponse(BaseModel):
     refresh_token: str
     token_type: str = 'bearer'
     user: dict
+
+
+class LogoutResponse(BaseModel):
+    message: str
