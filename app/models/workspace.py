@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from typing import Optional
 
@@ -5,13 +6,14 @@ from sqlmodel import Column, DateTime, Field, func, Index
 from app.models.base_model import BaseModel
 
 
-class User(BaseModel, table=True):
-    __tablename__ = 'users'
+class Workspace(BaseModel, table=True):
+    __table_args__ = (Index('ix_workspace', 'id', unique=True),)
 
-    email: str = Field(unique=True)
-    username: Optional[str] = Field(default=None, nullable=True)
-    role: str = Field(default='user')
-    avatar_url: Optional[str] = Field(default=None, nullable=True)
+    name: str = Field(unique=True)
+    description: Optional[str] = Field(default=None, nullable=True)
+    status: str = Field(default='activate')
+    systems_count: int = Field(default=0)
+    user_id: UUID = Field(foreign_key='users.id')
 
     created_at: Optional[datetime] = Field(
         default=None, sa_column=Column(DateTime(timezone=True), default=func.now())

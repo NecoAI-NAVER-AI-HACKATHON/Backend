@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from dependency_injector.wiring import inject, Provide
@@ -5,6 +6,7 @@ from dependency_injector.wiring import inject, Provide
 from app.core.containers.application_container import ApplicationContainer
 from app.db.databases.supabase import SupabaseDatabase
 from app.repositories.user_repository import UserRepository
+from app.schemas.user_schema import UserResponse
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
@@ -18,7 +20,7 @@ def get_current_user(
     user_repo: UserRepository = Depends(
         Provide[ApplicationContainer.repositories.user_repository]
     ),
-):
+) -> Optional[UserResponse]:
     '''Dependency returns authenticated user from Supabase token.'''
     try:
         sb = supabase_db.get_client()
@@ -42,10 +44,7 @@ def get_current_user(
                 detail='Error when getting user profile',
             )
 
-        return {
-            'auth_user': auth_user.model_dump(),
-            'profile': profile.model_dump() if profile else None,
-        }
+        return profile
 
     except HTTPException:
         raise

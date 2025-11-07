@@ -13,6 +13,8 @@ class ApplicationContainer(containers.DeclarativeContainer):
         modules=[
             'app.api.endpoints.auth',
             'app.api.endpoints.user',
+            'app.api.endpoints.workspace',
+            'app.api.endpoints.system',
             'app.core.dependencies.auth_deps',
         ]
     )
