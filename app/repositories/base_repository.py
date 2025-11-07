@@ -4,7 +4,6 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 from app.models.base_model import BaseModel
-from app.schemas.user_schema import UserResponse
 
 
 T = TypeVar('T', bound=BaseModel)
@@ -33,7 +32,7 @@ class BaseRepository:
     def find_by_id(self, model_id: UUID):
         with self.session_factory() as session:
             model = session.get(self.model, model_id)
-            return UserResponse.model_validate(model) if model else None
+            return self.model.model_validate(model) if model else None
 
     def update(self, model_id: UUID, update_request: T):
         with self.session_factory() as session:

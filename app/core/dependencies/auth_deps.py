@@ -37,10 +37,9 @@ def get_current_user(
         try:
             profile = user_repo.find_by_email(auth_user.email)
         except Exception as e:
-            print("Error when finding profile:", e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Error when getting user profile",
+                detail='Error when getting user profile',
             )
 
         return {

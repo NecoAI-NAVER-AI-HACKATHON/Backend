@@ -13,4 +13,5 @@ class BaseUser(BaseModel):
         from_attributes = True
 
 
-class UserResponse(ModelBaseInfo, BaseUser): ...
+class UserResponse(ModelBaseInfo, BaseUser):
+    pass

@@ -1,7 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from dependency_injector.wiring import inject
-
 from app.core.dependencies.auth_deps import get_current_user
 
 router = APIRouter(prefix='/user', tags=['user'])

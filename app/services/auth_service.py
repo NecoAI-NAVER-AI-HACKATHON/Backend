@@ -45,7 +45,7 @@ class AuthService:
             return SignupResponse(
                 user=res.user.model_dump() if res.user else None,
                 session=res.session.model_dump() if res.session else None,
-                message='Signup successfully.',
+                message='Signed up successfully.',
             )
         except Exception as e:
             # Supabase throws AuthApiError
@@ -94,6 +94,6 @@ class AuthService:
     def logout(self, token: str) -> LogoutResponse:
         try:
             self._auth_repo.sign_out(token)
-            return LogoutResponse(message='Logout successfully.')
+            return LogoutResponse(message='Logged out successfully.')
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))

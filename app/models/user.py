@@ -7,7 +7,6 @@ from app.models.base_model import BaseModel
 
 class User(BaseModel, table=True):
     __tablename__ = 'users'
-    __table_args__ = (Index('ix_user', 'id', 'email', unique=True),)
 
     email: str = Field(unique=True)
     username: Optional[str] = Field(default=None, nullable=True)

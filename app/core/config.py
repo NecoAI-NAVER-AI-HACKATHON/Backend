@@ -41,9 +41,9 @@ class AppConfig(BaseSettings):
 
     BACKEND_CORS_ORIGINS: List[str] = ['*']
 
-    DB_USER: str = os.getenv('DB_USER')
-    DB_PASSWORD: str = os.getenv('DB_PASSWORD')
-    DB_HOST: str = os.getenv('DB_HOST')
+    DB_USER: str = os.getenv('DB_USER', 'neco_ai_user')
+    DB_PASSWORD: str = os.getenv('DB_PASSWORD', 'neco_ai_password')
+    DB_HOST: str = os.getenv('DB_HOST', 'localhost')
     DB_PORT: str = os.getenv('DB_PORT', '5432')
     DB_NAME: str = os.getenv('DB_NAME', 'neco_ai_db')
     DB_ENGINE: str = os.getenv('DB_ENGINE', 'postgresql')
@@ -52,15 +52,13 @@ class AppConfig(BaseSettings):
         '{db_engine}://{user}:{password}@{host}:{port}/{database}'
     )
 
-    DATABASE_URI: str = (
-        '{db_engine}://{user}:{password}@{host}:{port}/{database}'.format(
-            db_engine=DB_ENGINE,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT,
-            database=DB_NAME,
-        )
+    DATABASE_URI: str = DATABASE_URI_FORMAT.format(
+        db_engine=DB_ENGINE,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT,
+        database=DB_NAME,
     )
 
     SUPABASE_URL: str = os.getenv('SUPABASE_URL', '')
