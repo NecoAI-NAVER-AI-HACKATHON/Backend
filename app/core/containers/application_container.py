@@ -2,6 +2,7 @@ from dependency_injector import containers, providers
 import logging
 from app.core.config import configs
 from app.core.containers.database_container import DatabaseContainer
+from app.core.containers.repository_container import RepositoryContainer
 from app.core.containers.service_container import ServiceContainer
 
 
@@ -12,6 +13,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         modules=[
             'app.api.endpoints.auth',
             'app.api.endpoints.user',
+            'app.core.dependencies.auth_deps',
         ]
     )
 
@@ -23,7 +25,14 @@ class ApplicationContainer(containers.DeclarativeContainer):
         config=config,
     )
 
+    repositories = providers.Container(
+        RepositoryContainer,
+        config=config,
+        database=database,
+    )
+
     services = providers.Container(
         ServiceContainer,
         config=config,
+        repositories=repositories,
     )

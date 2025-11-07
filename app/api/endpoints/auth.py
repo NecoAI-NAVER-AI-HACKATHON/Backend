@@ -4,7 +4,6 @@ from fastapi.security import OAuth2PasswordBearer
 from dependency_injector.wiring import Provide, inject
 
 from app.core.containers.application_container import ApplicationContainer
-from app.db.database import Database
 from app.schemas.auth_schema import (
     LogoutResponse,
     SignupRequest,
@@ -14,6 +13,7 @@ from app.schemas.auth_schema import (
     RefreshRequest,
     RefreshResponse,
 )
+from app.services.auth_service import AuthService
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -26,22 +26,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 @inject
 def signup(
     payload: SignupRequest,
-    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+    auth_service: AuthService = Depends(
+        Provide[ApplicationContainer.services.auth_service]
+    ),
 ):
     try:
-        sb = db.get_client()
-        res = sb.auth.sign_up(
-            {
-                'email': payload.email,
-                'password': payload.password,
-            }
-        )
-
-        return {
-            'user': res.user.model_dump() if res.user else None,
-            'session': res.session.model_dump() if res.session else None,
-            'message': 'Signup successfully.',
-        }
+        return auth_service.sign_up(payload)
     except Exception as e:
         # Supabase throws AuthApiError
         raise HTTPException(status_code=400, detail=str(e))
@@ -51,24 +41,12 @@ def signup(
 @inject
 def login(
     payload: LoginRequest,
-    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+    auth_service: AuthService = Depends(
+        Provide[ApplicationContainer.services.auth_service]
+    ),
 ):
     try:
-        sb = db.get_client()
-        res = sb.auth.sign_in_with_password(
-            {
-                'email': payload.email,
-                'password': payload.password,
-            }
-        )
-        if not res.session or not res.session.access_token:
-            raise HTTPException(status_code=401, detail='Login failed.')
-
-        return {
-            'access_token': res.session.access_token,
-            'refresh_token': res.session.refresh_token,
-            'user': res.user.model_dump() if res.user else {},
-        }
+        return auth_service.login(payload)
     except Exception as e:
         # Wrong password / user not found / email not confirmed...
         raise HTTPException(status_code=401, detail=str(e))
@@ -78,19 +56,12 @@ def login(
 @inject
 def refresh(
     payload: RefreshRequest,
-    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+    auth_service: AuthService = Depends(
+        Provide[ApplicationContainer.services.auth_service]
+    ),
 ):
     try:
-        sb = db.get_client()
-        res = sb.auth.refresh_session(payload.refresh_token)
-        if not res.session or not res.session.access_token:
-            raise HTTPException(status_code=401, detail='Invalid refresh token.')
-
-        return {
-            'access_token': res.session.access_token,
-            'refresh_token': res.session.refresh_token,
-            'user': res.user.model_dump() if res.user else {},
-        }
+        return auth_service.refresh(payload)
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
 
@@ -99,16 +70,13 @@ def refresh(
 @inject
 def logout(
     token: str = Depends(oauth2_scheme),
-    db: Database = Depends(Provide[ApplicationContainer.database.db]),
+    auth_service: AuthService = Depends(
+        Provide[ApplicationContainer.services.auth_service]
+    ),
 ):
     try:
         # Sign out the user using the provided JWT
         # This will revoke the refresh token and clear the session.
-        sb = db.get_client()
-        sb.auth.admin.sign_out(token)
-
-        return {
-            'message': 'Logout successfully.',
-        }
+        return auth_service.logout(token)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

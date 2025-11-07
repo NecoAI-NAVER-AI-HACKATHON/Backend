@@ -9,7 +9,7 @@ load_dotenv()
 ENV: str = os.getenv('ENV', 'dev')
 
 
-class Configs(BaseSettings):
+class AppConfig(BaseSettings):
     ENV: str = os.getenv('ENV', 'dev')
 
     API: str = '/api'
@@ -41,6 +41,26 @@ class Configs(BaseSettings):
 
     BACKEND_CORS_ORIGINS: List[str] = ['*']
 
+    DB_USER: str = os.getenv('DB_USER', 'neco_ai_user')
+    DB_PASSWORD: str = os.getenv('DB_PASSWORD', 'neco_ai_password')
+    DB_HOST: str = os.getenv('DB_HOST', 'localhost')
+    DB_PORT: str = os.getenv('DB_PORT', '5432')
+    DB_NAME: str = os.getenv('DB_NAME', 'neco_ai_db')
+    DB_ENGINE: str = os.getenv('DB_ENGINE', 'postgresql')
+
+    DATABASE_URI_FORMAT: str = (
+        '{db_engine}://{user}:{password}@{host}:{port}/{database}'
+    )
+
+    DATABASE_URI: str = DATABASE_URI_FORMAT.format(
+        db_engine=DB_ENGINE,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT,
+        database=DB_NAME,
+    )
+
     SUPABASE_URL: str = os.getenv('SUPABASE_URL', '')
     SUPABASE_ANON_KEY: str = os.getenv('SUPABASE_ANON_KEY', '')
 
@@ -52,15 +72,15 @@ class Configs(BaseSettings):
         case_sensitive = True
 
 
-class TestConfigs(Configs):
+class TestConfig(AppConfig):
     ENV: str = 'test'
 
 
-configs = Configs()
+configs = AppConfig()
 
 if ENV == 'prod':
     pass
 elif ENV == 'stage':
     pass
 elif ENV == 'test':
-    configs = TestConfigs()
+    configs = TestConfig()
