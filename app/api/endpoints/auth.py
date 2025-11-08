@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials
 
 from dependency_injector.wiring import Provide, inject
 
@@ -14,10 +14,9 @@ from app.schemas.auth_schema import (
     RefreshResponse,
 )
 from app.services.auth_service import AuthService
+from app.core.dependencies.auth_deps import bearer_scheme
 
 router = APIRouter(prefix='/auth', tags=['auth'])
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 @router.post(
@@ -69,7 +68,7 @@ def refresh(
 @router.post('/logout', response_model=LogoutResponse)
 @inject
 def logout(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     auth_service: AuthService = Depends(
         Provide[ApplicationContainer.services.auth_service]
     ),
@@ -77,6 +76,13 @@ def logout(
     try:
         # Sign out the user using the provided JWT
         # This will revoke the refresh token and clear the session.
+        token = credentials.credentials if credentials else None
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='No token provided for logout.',
+            )
+
         return auth_service.logout(token)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
