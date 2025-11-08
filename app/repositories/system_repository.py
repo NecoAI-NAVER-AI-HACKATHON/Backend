@@ -1,3 +1,4 @@
+from uuid import UUID
 from contextlib import AbstractContextManager
 from typing import Callable
 
@@ -12,7 +13,7 @@ class SystemRepository(BaseRepository):
     def __init__(self, session_factory: Callable[..., AbstractContextManager[Session]]):
         super().__init__(session_factory, System)
 
-    def find_all_by_workspace_id(self, workspace_id: str) -> list[SystemResponse]:
+    def find_all_by_workspace_id(self, workspace_id: UUID) -> list[SystemResponse]:
         with self.session_factory() as session:
             systems = (
                 session.query(System).filter(System.workspace_id == workspace_id).all()

@@ -23,7 +23,7 @@ class CreateSystemRequest(BaseModel):
     description: str | None = Field(default=None, max_length=1024)
     global_config: dict | None = Field(default=None)
     metadata_info: dict | None = Field(default=None)
-    workspace_id: str
+    workspace_id: UUID
 
 
 class SystemResponse(ModelBaseInfo, BaseSystem): ...

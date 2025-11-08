@@ -73,6 +73,8 @@ class SystemService:
                 )
 
             return SystemResponse(**found_system.model_dump())
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -90,6 +92,8 @@ class SystemService:
             systems = self._system_repo.find_all_by_workspace_id(workspace_id)
 
             return SystemListResponse(systems=systems, total=len(systems))
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -104,14 +108,16 @@ class SystemService:
     #     self._system_repo.update(system)
     #     return UpdateSystemResponse(system=system.model_dump())
 
-    def delete_system(self, system_id: UUID) -> dict:
-        try:
-            found_system = self._system_repo.find_by_id(system_id)
-            if not found_system:
-                raise HTTPException(status_code=404, detail='System not found.')
+    # def delete_system(self, system_id: UUID, user_id: UUID) -> dict:
+    #     try:
+    #         found_system = self._system_repo.find_by_id(system_id)
+    #         if not found_system:
+    #             raise HTTPException(status_code=404, detail='System not found.')
 
-            self._system_repo.delete(found_system.id)
+    #         self._system_repo.delete(found_system.id)
 
-            return {"message": "System deleted successfully."}
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=str(e))
+    #         return {'message': 'System deleted successfully.'}
+    #     except HTTPException:
+    #         raise
+    #     except Exception as e:
+    #         raise HTTPException(status_code=400, detail=str(e))

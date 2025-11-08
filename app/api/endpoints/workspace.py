@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends
+from uuid import UUID
+from fastapi import APIRouter, HTTPException, Depends, status
 
 from dependency_injector.wiring import Provide, inject
 
@@ -15,7 +16,7 @@ from app.services.workspace_service import WorkspaceService
 router = APIRouter(prefix='/workspace', tags=['workspace'])
 
 
-@router.post('/', response_model=WorkspaceResponse)
+@router.post('/', response_model=WorkspaceResponse, status_code=status.HTTP_201_CREATED)
 @inject
 def create_workspace(
     payload: CreateWorkspaceRequest,
@@ -26,11 +27,11 @@ def create_workspace(
 ):
     try:
         if not current_user:
-            raise HTTPException(status_code=401, detail="Unauthorized access.")
+            raise HTTPException(status_code=401, detail='Unauthorized access.')
 
         return workspace_service.create_workspace(payload, current_user.id)
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+    except Exception:
+        raise
 
 
 @router.get('/', response_model=WorkspaceListResponse)
@@ -43,11 +44,11 @@ def get_workspace(
 ):
     try:
         if not current_user:
-            raise HTTPException(status_code=401, detail="Unauthorized access.")
+            raise HTTPException(status_code=401, detail='Unauthorized access.')
 
         return workspace_service.get_all_workspaces(current_user.id)
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+    except Exception:
+        raise
 
 
 @router.get('/{workspace_id}', response_model=WorkspaceResponse)
@@ -61,13 +62,11 @@ def get_workspace_info(
 ):
     try:
         if not current_user:
-            raise HTTPException(status_code=401, detail="Unauthorized access.")
-        if not workspace_id:
-            raise HTTPException(status_code=400, detail="Workspace ID is required.")
+            raise HTTPException(status_code=401, detail='Unauthorized access.')
 
-        return workspace_service.get_workspace(workspace_id, current_user.id)
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        return workspace_service.get_workspace(UUID(workspace_id), current_user.id)
+    except Exception:
+        raise
 
 
 @router.delete('/{workspace_id}', response_model=dict)
@@ -81,10 +80,8 @@ def delete_workspace(
 ):
     try:
         if not current_user:
-            raise HTTPException(status_code=401, detail="Unauthorized access.")
-        if not workspace_id:
-            raise HTTPException(status_code=400, detail="Workspace ID is required.")
+            raise HTTPException(status_code=401, detail='Unauthorized access.')
 
-        return workspace_service.delete_workspace(workspace_id)
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        return workspace_service.delete_workspace(UUID(workspace_id), current_user.id)
+    except Exception:
+        raise

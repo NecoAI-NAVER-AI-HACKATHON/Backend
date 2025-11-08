@@ -1,7 +1,6 @@
 from uuid import UUID
 from fastapi import HTTPException, status
 
-from app.models.user import User
 from app.models.workspace import Workspace
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.workspace_schema import (
@@ -46,6 +45,8 @@ class WorkspaceService:
                 )
 
             return WorkspaceResponse(**found_workspace.model_dump())
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -68,14 +69,21 @@ class WorkspaceService:
     #     self._workspace_repo.update(workspace)
     #     return UpdateWorkspaceResponse(workspace=workspace.model_dump())
 
-    def delete_workspace(self, workspace_id: UUID) -> dict:
+    def delete_workspace(self, workspace_id: UUID, user_id: UUID) -> dict:
         try:
             found_workspace = self._workspace_repo.find_by_id(workspace_id)
             if not found_workspace:
                 raise HTTPException(status_code=404, detail='Workspace not found.')
 
+            if found_workspace.user_id != user_id:
+                raise HTTPException(
+                    status_code=403, detail='Not authorized to delete this workspace.'
+                )
+
             self._workspace_repo.delete(found_workspace.id)
 
-            return {"message": "Workspace deleted successfully."}
+            return {'message': 'Workspace deleted successfully.'}
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
