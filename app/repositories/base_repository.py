@@ -20,6 +20,7 @@ class BaseRepository:
 
     def create(self, create_request: T):
         with self.session_factory() as session:
+            # exclude_none=True to avoid overwriting default values in the database
             request = self.model(**create_request.model_dump(exclude_none=True))
             model_db = self.model.model_validate(request)
 
@@ -27,7 +28,16 @@ class BaseRepository:
             session.commit()
             session.refresh(model_db)
 
-            return model_db
+            # Return a validated pydantic/sqlmodel model for consistency with
+            # `find_by_id` which returns a validated model. This ensures
+            # callers receive a serializable object (not a DB-managed instance
+            # that may be expired after the session closes).
+            return self.model.model_validate(model_db)
+
+    def find_all(self):
+        with self.session_factory() as session:
+            models = session.query(self.model).all()
+            return [self.model.model_validate(m) for m in models]
 
     def find_by_id(self, model_id: UUID):
         with self.session_factory() as session:
