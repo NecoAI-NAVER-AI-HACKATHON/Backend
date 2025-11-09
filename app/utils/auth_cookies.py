@@ -26,5 +26,10 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     )
 
 def clear_auth_cookies(response: Response):
-    response.delete_cookie(configs.ACCESS_TOKEN_NAME, path=configs.COOKIE_PATH, domain=configs.COOKIE_DOMAIN)
-    response.delete_cookie(configs.REFRESH_TOKEN_NAME, path=configs.COOKIE_PATH, domain=configs.COOKIE_DOMAIN)
+    cookie_kw = dict(
+        path=configs.COOKIE_PATH,
+    )
+    if configs.COOKIE_DOMAIN:
+        cookie_kw["domain"] = configs.COOKIE_DOMAIN
+    response.delete_cookie(configs.ACCESS_TOKEN_NAME, **cookie_kw)
+    response.delete_cookie(configs.REFRESH_TOKEN_NAME, **cookie_kw)
