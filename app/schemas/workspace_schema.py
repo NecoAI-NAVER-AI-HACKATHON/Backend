@@ -23,9 +23,19 @@ class CreateWorkspaceRequest(BaseModel):
     description: str | None = Field(default=None, max_length=1024)
 
 
+class SearchWorkspaceRequest(BaseModel):
+    name: str | None = Field(default=None, max_length=255)
+    status: str | None = Field(default=None)
+    sorting: str | None = Field(default=None)  # e.g., 'name', 'created_at'
+    order: str | None = Field(default=None)  # 'asc' or 'desc'
+
+
 class WorkspaceResponse(ModelBaseInfo, BaseWorkspace): ...
 
 
 class WorkspaceListResponse(BaseModel):
     workspaces: list[WorkspaceResponse]
     total: int
+    # Paging info (optional) - included when requests use paging
+    page: int | None = None
+    per_page: int | None = None

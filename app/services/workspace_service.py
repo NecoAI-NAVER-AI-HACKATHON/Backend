@@ -7,6 +7,7 @@ from app.schemas.workspace_schema import (
     CreateWorkspaceRequest,
     WorkspaceResponse,
     WorkspaceListResponse,
+    SearchWorkspaceRequest,
 )
 
 
@@ -50,11 +51,42 @@ class WorkspaceService:
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
-    def get_all_workspaces(self, user_id: UUID) -> WorkspaceListResponse:
+    def get_all_workspaces(
+        self, user_id: UUID, page: int = 1, per_page: int = 10
+    ) -> WorkspaceListResponse:
         try:
-            workspaces = self._workspace_repo.find_all_by_user_id(user_id)
+            if page < 1:
+                raise HTTPException(status_code=400, detail='Page must be >= 1')
+            if per_page < 1:
+                raise HTTPException(status_code=400, detail='per_page must be >= 1')
 
-            return WorkspaceListResponse(workspaces=workspaces, total=len(workspaces))
+            offset = (page - 1) * per_page
+
+            workspaces, total = self._workspace_repo.find_all_by_user_id(
+                user_id, offset=offset, limit=per_page
+            )
+
+            return WorkspaceListResponse(
+                workspaces=workspaces, total=total, page=page, per_page=per_page
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+    def search_workspace(
+        self, payload: SearchWorkspaceRequest, user_id: UUID
+    ) -> WorkspaceListResponse:
+        try:
+            workspaces = self._workspace_repo.search_by_criteria(
+                user_id,
+                name=payload.name,
+                status=payload.status,
+                sorting=payload.sorting,
+                order=payload.order,
+            )
+
+            return workspaces
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
