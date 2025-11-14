@@ -13,7 +13,7 @@ from app.schemas.system_schema import (
 from app.schemas.user_schema import UserResponse
 from app.services.system_service import SystemService
 
-router = APIRouter(prefix='/workspace', tags=['system info'])
+router = APIRouter(prefix='/workspaces', tags=['system info'])
 
 
 @router.post(

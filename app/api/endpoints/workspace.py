@@ -10,10 +10,11 @@ from app.schemas.workspace_schema import (
     CreateWorkspaceRequest,
     WorkspaceListResponse,
     WorkspaceResponse,
+    SearchWorkspaceRequest,
 )
 from app.services.workspace_service import WorkspaceService
 
-router = APIRouter(prefix='/workspace', tags=['workspace'])
+router = APIRouter(prefix='/workspaces', tags=['workspace'])
 
 
 @router.post('/', response_model=WorkspaceResponse, status_code=status.HTTP_201_CREATED)
@@ -37,6 +38,8 @@ def create_workspace(
 @router.get('/', response_model=WorkspaceListResponse)
 @inject
 def get_workspace(
+    page: int = 1,
+    per_page: int = 10,
     current_user: UserResponse = Depends(get_current_user),
     workspace_service: WorkspaceService = Depends(
         Provide[ApplicationContainer.services.workspace_service]
@@ -46,7 +49,7 @@ def get_workspace(
         if not current_user:
             raise HTTPException(status_code=401, detail='Unauthorized access.')
 
-        return workspace_service.get_all_workspaces(current_user.id)
+        return workspace_service.get_all_workspaces(current_user.id, page, per_page)
     except Exception:
         raise
 
@@ -65,6 +68,24 @@ def get_workspace_info(
             raise HTTPException(status_code=401, detail='Unauthorized access.')
 
         return workspace_service.get_workspace(UUID(workspace_id), current_user.id)
+    except Exception:
+        raise
+
+
+@router.post('/search', response_model=WorkspaceListResponse)
+@inject
+def search_workspace(
+    payload: SearchWorkspaceRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    workspace_service: WorkspaceService = Depends(
+        Provide[ApplicationContainer.services.workspace_service]
+    ),
+):
+    try:
+        if not current_user:
+            raise HTTPException(status_code=401, detail='Unauthorized access.')
+
+        return workspace_service.search_workspace(payload, current_user.id)
     except Exception:
         raise
 
