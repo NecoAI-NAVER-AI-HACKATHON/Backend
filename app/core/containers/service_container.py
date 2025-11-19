@@ -11,6 +11,7 @@ class ServiceContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
 
     repositories = providers.DependenciesContainer()
+    custom_containers = providers.DependenciesContainer()
 
     auth_service = providers.Factory(
         AuthService,
@@ -33,6 +34,7 @@ class ServiceContainer(containers.DeclarativeContainer):
         SystemExecutionService,
         execution_repo=repositories.system_execution_repository,
         system_repo=repositories.system_repository,
+        workflow_client=custom_containers.workflow_client,
     )
 
     node_definition_service = providers.Singleton(

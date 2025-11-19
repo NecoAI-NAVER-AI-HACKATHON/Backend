@@ -12,7 +12,8 @@ from typing import Optional
 
 from fastapi import FastAPI, Response
 from starlette.middleware.cors import CORSMiddleware
-from redis import asyncio as aioredis
+
+# from redis import asyncio as aioredis
 
 from app.api.routes import routers
 from app.configs.app_config import configs
@@ -93,10 +94,10 @@ class Application:
             openapi_url=f'{self.configs.API}/openapi.json',
             lifespan=self._lifespan,
         )
-        redis = aioredis.from_url(
-            configs.REDIS_URL, encoding="utf-8", decode_responses=True
-        )
-        app.state.redis = redis
+        # redis = aioredis.from_url(
+        #     configs.REDIS_URL, encoding="utf-8", decode_responses=True
+        # )
+        # app.state.redis = redis
 
         self._add_cors(app)
         self._add_simple_endpoints(app)

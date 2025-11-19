@@ -65,6 +65,7 @@ class AppConfig(BaseSettings):
     SUPABASE_ANON_KEY: str = os.getenv('SUPABASE_ANON_KEY', '')
 
     REDIS_URL: str = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    MAIN_QUEUE: str = os.getenv('MAIN_QUEUE', 'queue:main')
 
     PAGE: int = 1
     PAGE_SIZE: int = 20

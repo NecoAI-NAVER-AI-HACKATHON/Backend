@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends, status
 
 from dependency_injector.wiring import Provide, inject
 
@@ -9,7 +9,6 @@ from app.schemas.user_schema import UserResponse
 from app.schemas.system_execution_schema import (
     CreateSystemExecutionRequest,
     SystemExecutionResponse,
-    SystemExecutionListResponse,
 )
 from app.services.system_execution_service import SystemExecutionService
 
@@ -55,19 +54,20 @@ def get_execution(
         raise
 
 
-@router.get('/system/{system_id}', response_model=SystemExecutionListResponse)
+@router.post('/{execution_id}', response_model=dict)
 @inject
-def get_executions_by_system(
-    system_id: str,
-    current_user: UserResponse = Depends(get_current_user),
+async def start_workflow(
+    execution_id: str,
+    # current_user: UserResponse = Depends(get_current_user),
+    background_tasks: BackgroundTasks,
     execution_service: SystemExecutionService = Depends(
         Provide[ApplicationContainer.services.system_execution_service]
     ),
 ):
     try:
-        if not current_user:
-            raise HTTPException(status_code=401, detail='Unauthorized access.')
+        # if not current_user:
+        #     raise HTTPException(status_code=401, detail='Unauthorized access.')
 
-        return execution_service.get_executions_by_system(UUID(system_id))
+        return await execution_service.start(UUID(execution_id), background_tasks)
     except Exception:
         raise

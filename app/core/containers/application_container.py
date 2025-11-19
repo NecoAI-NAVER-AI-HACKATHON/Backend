@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
 import logging
 from typing import Mapping, Optional
+from app.core.containers.custom_container import CustomContainer
 from app.core.containers.database_container import DatabaseContainer
 from app.core.containers.repository_container import RepositoryContainer
 from app.core.containers.service_container import ServiceContainer
@@ -38,10 +39,16 @@ class ApplicationContainer(containers.DeclarativeContainer):
         database=database,
     )
 
+    custom_containers = providers.Container(
+        CustomContainer,
+        config=config,
+    )
+
     services = providers.Container(
         ServiceContainer,
         config=config,
         repositories=repositories,
+        custom_containers=custom_containers,
     )
 
     @classmethod
