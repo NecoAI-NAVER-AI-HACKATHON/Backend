@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
 import logging
-from app.core.config import configs
+from typing import Mapping, Optional
 from app.core.containers.database_container import DatabaseContainer
 from app.core.containers.repository_container import RepositoryContainer
 from app.core.containers.service_container import ServiceContainer
@@ -15,12 +15,17 @@ class ApplicationContainer(containers.DeclarativeContainer):
             'app.api.endpoints.user',
             'app.api.endpoints.workspace',
             'app.api.endpoints.system',
+            'app.api.endpoints.system_execution',
             'app.core.dependencies.auth_deps',
+            'app.core.dependencies.upload_trigger_deps',
         ]
     )
 
     config = providers.Configuration()
-    config.override(configs.model_dump())
+    # Don't import global configs here. Provide configs to the container at runtime
+    # by using the `create` helper below or by calling `container.config.from_dict(...)`
+    # This keeps the container decoupled from any particular config source and
+    # allows tests or different environments to supply their own config dict.
 
     database = providers.Container(
         DatabaseContainer,
@@ -38,3 +43,24 @@ class ApplicationContainer(containers.DeclarativeContainer):
         config=config,
         repositories=repositories,
     )
+
+    @classmethod
+    def create(cls, config_data: Optional[Mapping] = None) -> "ApplicationContainer":
+        """
+        Create and return an instance of ApplicationContainer with optional config data.
+
+        Examples:
+            from app.configs.app_config import configs
+            container = ApplicationContainer.create(configs)
+
+            # or, programmatically
+            container = ApplicationContainer.create({"db": {"dsn": "..."}})
+
+        The provided mapping will be loaded into the internal `config` provider via
+        `from_dict`, which is compatible with the Dependency Injector `Configuration`.
+        """
+        container = cls()
+        if config_data:
+            # load mapping into the Configuration provider
+            container.config.from_dict(dict(config_data))
+        return container

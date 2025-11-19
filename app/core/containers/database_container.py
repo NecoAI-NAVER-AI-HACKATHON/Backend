@@ -21,5 +21,5 @@ class DatabaseContainer(containers.DeclarativeContainer):
         create_database,
         db_type='postgresql',
         configs=config,
-        echo=True,
+        echo=False,
     )

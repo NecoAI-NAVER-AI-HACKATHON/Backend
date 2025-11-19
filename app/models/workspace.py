@@ -9,7 +9,7 @@ from app.models.base_model import BaseModel
 class Workspace(BaseModel, table=True):
     __table_args__ = (Index('ix_workspace', 'id', unique=True),)
 
-    name: str = Field(unique=True)
+    name: str = Field(nullable=False)
     description: Optional[str] = Field(default=None, nullable=True)
     status: str = Field(default='activate')
     systems_count: int = Field(default=0)

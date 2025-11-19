@@ -12,9 +12,10 @@ from typing import Optional
 
 from fastapi import FastAPI, Response
 from starlette.middleware.cors import CORSMiddleware
+from redis import asyncio as aioredis
 
 from app.api.routes import routers
-from app.core.config import configs
+from app.configs.app_config import configs
 from app.core.containers.application_container import ApplicationContainer
 
 
@@ -56,7 +57,7 @@ class Application:
         app.include_router(routers, prefix=self.configs.API_V1_STR)
 
     def _build_container(self) -> ApplicationContainer:
-        container = ApplicationContainer()
+        container = ApplicationContainer.create(config_data=self.configs.model_dump())
         # wire local modules if required by the container
         container.wire(modules=[__name__])
         return container
@@ -92,6 +93,10 @@ class Application:
             openapi_url=f'{self.configs.API}/openapi.json',
             lifespan=self._lifespan,
         )
+        redis = aioredis.from_url(
+            configs.REDIS_URL, encoding="utf-8", decode_responses=True
+        )
+        app.state.redis = redis
 
         self._add_cors(app)
         self._add_simple_endpoints(app)
