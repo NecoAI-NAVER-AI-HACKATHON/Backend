@@ -18,7 +18,7 @@ class CreateSystemExecutionRequest(BaseModel):
 class SystemExecutionResponse(ModelBaseInfo):
     system_id: UUID
     system_json: Optional[dict] = Field(default_factory=dict)
-    logs: Optional[dict] = Field(default_factory=dict)
+    logs: Optional[list[dict]] = Field(default_factory=list)
     status: Optional[str] = ''
     started_at: Optional[datetime] = None
     stopped_at: Optional[datetime] = None

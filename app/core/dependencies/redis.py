@@ -108,6 +108,8 @@ class WorkflowClient:
             "payload": payload or {},
             "exec_id": exec_id,
             "created_at": int(time.time()),
+            "workflow_id": self.workflow_def.get("id"),
+            "is_trigger_job": True,
         }
         return job
 

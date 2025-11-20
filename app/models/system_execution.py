@@ -19,8 +19,8 @@ class SystemExecution(BaseModel, table=True):
         description='System configuration in JSON format',
     )
 
-    logs: Optional[dict] = Field(
-        default_factory=dict,
+    logs: Optional[list[dict]] = Field(
+        default_factory=list,
         sa_column=Column(JSON, nullable=True),
         description='Execution logs in JSON format',
     )
