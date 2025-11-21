@@ -52,7 +52,7 @@ def get_current_user(
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail='Error when getting user profile',
+                detail='Error when getting user profile: ' + str(e),
             )
 
         return profile
