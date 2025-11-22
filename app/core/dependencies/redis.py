@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional
 import redis.asyncio as aioredis
 
 # ---------------- CONFIG ----------------
-# REDIS_DSN = os.getenv("REDIS_DSN", "redis://localhost:6379/0")
+# REDIS_DSN = os.getenv("REDIS_DSN", "redis://35.189.8.131:6379/1")
 WORKFLOW_FILE_DEFAULT = os.getenv("WORKFLOW_FILE", "workflow.json")
 # MAIN_QUEUE = os.getenv("MAIN_QUEUE", "queue:main")
 
