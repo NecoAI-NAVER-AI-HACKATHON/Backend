@@ -11,7 +11,7 @@ class Workspace(BaseModel, table=True):
 
     name: str = Field(nullable=False)
     description: Optional[str] = Field(default=None, nullable=True)
-    status: str = Field(default='activate')
+    status: str = Field(default='active')
     systems_count: int = Field(default=0)
     user_id: UUID = Field(foreign_key='users.id')
 
