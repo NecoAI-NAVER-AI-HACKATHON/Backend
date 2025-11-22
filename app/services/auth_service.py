@@ -37,6 +37,8 @@ class AuthService:
 
             saved_user = self._user_repo.create(new_user)
             if not saved_user:
+                # Rollback auth user creation
+                self._auth_repo.delete_user(res.user.id)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail='Create user failed.',

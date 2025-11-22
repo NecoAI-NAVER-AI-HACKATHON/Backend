@@ -14,14 +14,19 @@ from app.schemas.system_execution_schema import (
 async def trigger_workflow_in_background(
     execution: SystemExecutionResponse,
     workflow_client=WorkflowClient,
-):
+) -> bool:
     print("Starting workflow in background task...")
-    await workflow_client.connect()
-    workflow_client.load_workflow(execution.system_json)
-    # run one-off trigger
-    await workflow_client.trigger_node_manual()
-    # close redis
-    await workflow_client.close()
+    try:
+        await workflow_client.connect()
+        workflow_client.load_workflow(execution.system_json)
+        # run one-off trigger
+        await workflow_client.trigger_node_manual()
+        # close redis
+        await workflow_client.close()
+        return True
+    except Exception as e:
+        print(f"Error triggering workflow: {e}")
+        return False
 
 
 class SystemExecutionService:
@@ -85,6 +90,15 @@ class SystemExecutionService:
             execution = self._execution_repo.find_by_id(execution_id)
             if not execution:
                 raise HTTPException(status_code=404, detail='Execution not found.')
+
+            if execution.status == 'running':
+                raise HTTPException(
+                    status_code=400, detail='Execution is already running.'
+                )
+
+            # Update status to 'running'
+            execution.status = 'running'
+            self._execution_repo.update(execution.id, execution)
 
             # `model_dump()` returns a dict; `model_validate` expects the data
             # as a single positional argument in pydantic v2, not keyword args.
