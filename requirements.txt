@@ -10,3 +10,5 @@ email-validator==2.3.0
 SQLAlchemy==2.0.44
 sqlmodel==0.0.27
 uvicorn==0.38.0
+google-api-python-client
+redis

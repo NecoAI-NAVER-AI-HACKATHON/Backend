@@ -64,6 +64,9 @@ class AppConfig(BaseSettings):
     SUPABASE_URL: str = os.getenv('SUPABASE_URL', '')
     SUPABASE_ANON_KEY: str = os.getenv('SUPABASE_ANON_KEY', '')
 
+    REDIS_URL: str = os.getenv('REDIS_URL', 'redis://35.189.8.131:6379/1')
+    MAIN_QUEUE: str = os.getenv('MAIN_QUEUE', 'queue:main')
+
     PAGE: int = 1
     PAGE_SIZE: int = 20
     ORDERING: str = '-id'
