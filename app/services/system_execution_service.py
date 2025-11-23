@@ -91,10 +91,10 @@ class SystemExecutionService:
             if not execution:
                 raise HTTPException(status_code=404, detail='Execution not found.')
 
-            if execution.status == 'running':
-                raise HTTPException(
-                    status_code=400, detail='Execution is already running.'
-                )
+            # if execution.status == 'running':
+            #     raise HTTPException(
+            #         status_code=400, detail='Execution is already running.'
+            #     )
 
             # Update status to 'running'
             execution.status = 'running'

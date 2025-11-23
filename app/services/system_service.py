@@ -34,8 +34,6 @@ class SystemService:
             system = System(
                 name=payload.name,
                 description=payload.description,
-                global_config=payload.global_config,
-                metadata_info=payload.metadata_info,
                 workspace_id=found_workspace.id,
             )
 
